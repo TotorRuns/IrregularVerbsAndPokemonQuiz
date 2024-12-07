@@ -35,14 +35,14 @@ function Download-PokemonImage {
     }
 }
 
-# Download images for Pokemon from Gen 1-3 (1-386)
-Write-Host "Starting Pokemon image download (Gen 1-3)..."
+# Download images for Pokemon from Gen 1 (1-151)
+Write-Host "Starting Pokemon image download (Gen 1)..."
 
 # Create a counter for progress tracking
-$total = 386
+$total = 151
 $current = 0
 
-1..386 | ForEach-Object {
+1..151 | ForEach-Object {
     $current++
     $percentComplete = [math]::Round(($current / $total) * 100, 2)
     Write-Progress -Activity "Downloading Pokemon Images" -Status "Processing Pokemon #$_" -PercentComplete $percentComplete

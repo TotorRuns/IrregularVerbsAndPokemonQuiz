@@ -131,8 +131,8 @@
         let currentGermanName = null;
 
         async function getRandomPokemon() {
-            // Gen 1-3 Pokemon range from 1-386
-            const randomId = Math.floor(Math.random() * 386) + 1;
+            // Gen 1 Pokemon range from 1-151
+            const randomId = Math.floor(Math.random() * 151) + 1;
             try {
                 const [pokemon, species] = await Promise.all([
                     P.getPokemonByName(randomId),
