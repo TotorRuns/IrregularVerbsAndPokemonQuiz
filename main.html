@@ -57,7 +57,7 @@
             transform-style: preserve-3d;
         }
 
-        .verb-card:hover .verb-card-inner {
+        .verb-card.flipped .verb-card-inner {
             transform: rotateY(180deg);
         }
 
@@ -265,8 +265,8 @@
             return array;
         }
 
-        // Create a shuffled copy of verbs and take only 4
-        let verbs = shuffleArray([...allVerbs]).slice(0, 4);
+        // Create a shuffled copy of verbs
+        let verbs = shuffleArray([...allVerbs]);
         
         let currentVerb = null;
         let currentForm = null;
@@ -303,6 +303,11 @@
                         </div>
                     </div>
                 `;
+                
+                card.addEventListener('click', () => {
+                    card.classList.toggle('flipped');
+                });
+                
                 container.appendChild(card);
             });
         }
