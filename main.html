@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Englische Unregelmäßige Verben Lernen</title>
     <style>
+        /* Universal reset and default font */
         * {
             margin: 0;
             padding: 0;
@@ -15,45 +16,54 @@
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
-            padding: 2rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .container {
+            width: 100%;
             max-width: 1200px;
             margin: 0 auto;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
         }
 
         .header h1 {
             color: #2c3e50;
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+        }
+
+        .header p {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+        }
+
+        #verb-container {
+            display: grid;
+            gap: 1.5rem;
+            padding: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         }
 
         .verb-card {
             background: white;
             border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
             cursor: pointer;
-            position: relative;
-            perspective: 1000px;
-            min-height: 200px;
+            perspective: 1500px;
+            height: 200px;
         }
 
         .verb-card-inner {
-            position: absolute;
+            position: relative;
             width: 100%;
             height: 100%;
-            left: 0;
-            top: 0;
-            transition: transform 0.6s;
+            text-align: center;
+            transition: transform 0.8s;
             transform-style: preserve-3d;
         }
 
@@ -65,55 +75,33 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            backface-visibility: hidden;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 1rem;
+            border-radius: 15px;
+            backface-visibility: hidden;
+        }
+
+        .verb-card-front {
+            background: white;
         }
 
         .verb-card-back {
+            background: #e9f1fa;
             transform: rotateY(180deg);
-        }
-
-        .verb-forms {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-            width: 100%;
-        }
-
-        .verb-form {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .verb-form h3 {
-            color: #6c757d;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .verb-form p {
-            color: #2c3e50;
-            font-size: 1.2rem;
-            font-weight: 600;
         }
 
         .practice-btn {
             display: block;
-            width: 200px;
             margin: 2rem auto;
-            padding: 1rem;
+            padding: 1rem 2rem;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
             background: #4a90e2;
             color: white;
             border: none;
             border-radius: 25px;
-            font-size: 1.1rem;
             cursor: pointer;
             transition: background 0.3s ease;
         }
@@ -132,49 +120,64 @@
             background: rgba(0, 0, 0, 0.5);
             justify-content: center;
             align-items: center;
+            z-index: 1000;
+        }
+
+        .practice-modal.active {
+            display: flex;
         }
 
         .modal-content {
             background: white;
-            padding: 2rem;
+            padding: 1.5rem;
             border-radius: 15px;
-            width: 90%;
-            max-width: 500px;
+            width: min(95%, 400px);
+            text-align: center;
+        }
+
+        .modal-content h2 {
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
         }
 
         .practice-input {
             width: 100%;
-            padding: 0.5rem;
+            padding: 0.8rem;
             margin: 1rem 0;
-            font-size: 1.1rem;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
 
         .submit-btn {
+            width: 100%;
+            padding: 0.8rem;
+            font-size: clamp(1rem, 2vw, 1.2rem);
             background: #4a90e2;
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
         }
 
         .result {
             margin-top: 1rem;
-            font-weight: bold;
+            font-size: clamp(1rem, 2vw, 1.2rem);
         }
 
-        .pokemon-link {
-            text-align: center;
-            margin-top: 2rem;
+        .result.correct {
+            color: green;
         }
 
-        .pokemon-link a {
+        .result.incorrect {
+            color: red;
+        }
+        a {
             color: #4a90e2;
             text-decoration: none;
             font-weight: bold;
         }
 
-        .pokemon-link a:hover {
+        a:hover {
             text-decoration: underline;
         }
     </style>
@@ -265,8 +268,8 @@
             return array;
         }
 
-        // Create a shuffled copy of verbs
-        let verbs = shuffleArray([...allVerbs]);
+        // Create a shuffled copy of verbs and limit to 4
+        let verbs = shuffleArray([...allVerbs]).slice(0, 4);
         
         let currentVerb = null;
         let currentForm = null;
@@ -352,7 +355,7 @@
             currentForm = forms[Math.floor(Math.random() * forms.length)];
             
             const formName = currentForm === 'pastSimple' ? 'Past Simple' : 'Past Participle';
-            questionText.textContent = `Wie lautet die Form ${formName} von"${currentVerb.base}"?`;
+            questionText.textContent = `Wie lautet die Form ${formName} von "${currentVerb.base}"?`;
             answerInput.value = '';
             result.textContent = '';
         }
