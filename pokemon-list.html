@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Liste</title>
+    <script src="https://unpkg.com/pokeapi-js-wrapper/dist/index.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        .pokemon-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .pokemon-card:hover .pokemon-info {
+            display: block;
+        }
+
+        .pokemon-image {
+            width: 120px;
+            height: 120px;
+            margin: 1rem auto;
+        }
+
+        .pokemon-name {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            margin-top: 0.5rem;
+        }
+
+        .pokemon-info {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            width: 200px;
+            z-index: 100;
+            font-size: 0.9rem;
+        }
+
+        .pokemon-info::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px;
+            border-style: solid;
+            border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .links a {
+            color: #4a90e2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Alle Pokemon</h1>
+            <p>Eine Übersicht aller Pokemon aus den Generationen 1-3</p>
+        </div>
+        <div id="loading" class="loading">Lade Pokemon...</div>
+        <div id="pokemon-grid" class="pokemon-grid"></div>
+        <div class="links">
+            <a href="pokemon-quiz.html">Zurück zum Quiz</a>
+            <a href="main.html">Zurück zu Irregular Verbs</a>
+        </div>
+    </div>
+
+    <script>
+        const P = new Pokedex.Pokedex();
+        const pokemonCache = new Map();
+        
+        // German type name mapping
+        const typeTranslations = {
+            'normal': 'Normal',
+            'fighting': 'Kampf',
+            'flying': 'Flug',
+            'poison': 'Gift',
+            'ground': 'Boden',
+            'rock': 'Gestein',
+            'bug': 'Käfer',
+            'ghost': 'Geist',
+            'steel': 'Stahl',
+            'fire': 'Feuer',
+            'water': 'Wasser',
+            'grass': 'Pflanze',
+            'electric': 'Elektro',
+            'psychic': 'Psycho',
+            'ice': 'Eis',
+            'dragon': 'Drache',
+            'dark': 'Unlicht',
+            'fairy': 'Fee'
+        };
+
+        async function loadAllPokemon() {
+            const grid = document.getElementById('pokemon-grid');
+            const loading = document.getElementById('loading');
+
+            try {
+                // Load Pokemon from 1 to 386 (Gen 1-3)
+                for (let i = 1; i <= 386; i++) {
+                    if (!pokemonCache.has(i)) {
+                        const [pokemon, species] = await Promise.all([
+                            P.getPokemonByName(i),
+                            P.getPokemonSpeciesByName(i)
+                        ]);
+                        
+                        const germanNameData = species.names.find(name => name.language.name === 'de');
+                        const germanName = germanNameData ? germanNameData.name : pokemon.name;
+                        
+                        pokemonCache.set(i, {
+                            pokemon,
+                            germanName,
+                            types: pokemon.types.map(t => typeTranslations[t.type.name] || t.type.name),
+                            height: pokemon.height / 10, // Convert to meters
+                            weight: pokemon.weight / 10  // Convert to kg
+                        });
+                    }
+
+                    const {germanName, types, height, weight} = pokemonCache.get(i);
+                    const paddedId = String(i).padStart(3, '0');
+                    const imageUrl = `pokemon_images/${paddedId}.png`;
+
+                    const card = document.createElement('div');
+                    card.className = 'pokemon-card';
+                    card.innerHTML = `
+                        <img src="${imageUrl}" class="pokemon-image">
+                        <div class="pokemon-name">${germanName}</div>
+                        <div class="pokemon-info">
+                            <div>Typ: ${types.join(', ')}</div>
+                            <div>Größe: ${height}m</div>
+                            <div>Gewicht: ${weight}kg</div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                }
+                loading.style.display = 'none';
+            } catch (error) {
+                console.error('Error loading Pokemon:', error);
+                loading.textContent = 'Fehler beim Laden der Pokemon. Bitte aktualisieren Sie die Seite.';
+            }
+        }
+
+        // Initialize the list
+        loadAllPokemon();
+    </script>
+</body>
+</html>
